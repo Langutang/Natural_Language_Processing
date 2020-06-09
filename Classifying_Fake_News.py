@@ -41,3 +41,84 @@ print(tfidf_vectorizer.get_feature_names()[:10])
 
 # Print the first 5 vectors of the tfidf training data
 print(tfidf_train.A[:5])
+
+# Create the CountVectorizer DataFrame: count_df
+count_df = pd.DataFrame(count_train.A, columns=count_vectorizer.get_feature_names())
+
+# Create the TfidfVectorizer DataFrame: tfidf_df
+tfidf_df = pd.DataFrame(tfidf_train.A, columns=tfidf_vectorizer.get_feature_names())
+
+# Print the head of count_df
+print(count_df.head())
+
+# Print the head of tfidf_df
+print(tfidf_df.head())
+
+# Calculate the difference in columns: difference
+difference = set(count_df.columns) - set(tfidf_df.columns)
+print(difference)
+
+# Check whether the DataFrames are equal
+print(count_df.equals(tfidf_df))
+
+##########################################################################
+#NAIVE BAYES IS BEST MODEL FOR TEXT MODELING
+
+# Import the necessary modules
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import metrics
+
+# Instantiate a Multinomial Naive Bayes classifier: nb_classifier
+nb_classifier = MultinomialNB()
+
+# Fit the classifier to the training data
+nb_classifier.fit(count_train, y_train)
+
+# Create the predicted tags: pred
+pred = nb_classifier.predict(count_test)
+
+# Calculate the accuracy score: score
+score = metrics.accuracy_score(y_test, pred)
+print(score)
+
+# Calculate the confusion matrix: cm
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+print(cm)
+
+# Create a Multinomial Naive Bayes classifier: nb_classifier
+nb_classifier = MultinomialNB()
+
+# Fit the classifier to the training data
+nb_classifier.fit(tfidf_train, y_train)
+
+# Create the predicted tags: pred
+pred = nb_classifier.predict(tfidf_test)
+
+# Calculate the accuracy score: score
+score = metrics.accuracy_score(y_test, pred)
+print(score)
+
+# Calculate the confusion matrix: cm
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+print(cm)
+
+# Create the list of alphas: alphas
+alphas = np.arange(0, 1, .1)
+
+# Define train_and_predict()
+def train_and_predict(alpha):
+    # Instantiate the classifier: nb_classifier
+    nb_classifier = MultinomialNB(alpha=alpha)
+    # Fit to the training data
+    nb_classifier.fit(tfidf_train, y_train)
+    # Predict the labels: pred
+    pred = nb_classifier.predict(tfidf_test)
+    # Compute accuracy: score
+    score = metrics.accuracy_score(y_test, pred)
+    return score
+
+# Iterate over the alphas and print the corresponding score
+for alpha in alphas:
+    print('Alpha: ', alpha)
+    print('Score: ', train_and_predict(alpha))
+    print()
